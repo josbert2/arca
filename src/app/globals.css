@@ -73,5 +73,6 @@
   body {
     @apply bg-background text-foreground;
     background-color: #F7F7F9;
+    font-family: 'Plus Jakarta Sans', sans-serif;
   }
 }

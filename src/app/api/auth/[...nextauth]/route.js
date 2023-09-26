@@ -1,106 +1,59 @@
-import NextAuth from 'next-auth';
+import { prisma } from '@/lib/prisma'
+import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
+import bcrypt from "bcryptjs"
+import { NextResponse } from 'next/server'
 
 const handler = NextAuth({
-    providers: [
-        CredentialsProvider({
-            name: 'Credentials',
-            id: "credentials",
-            credentials: {
-                email: { label: "Email", type: "email", placeholder: "jsmith" },
-                password: { label: "Password", type: "password" }
-            },
-            async authorize(credencials, req) {
-                const user = { id: 1, name: 'J Smith', email: 'johe@gmail.com' }
-                return user
+  providers: [
+    CredentialsProvider({
+      name: "Credentials",
+      id: "credentials",
+      credentials: {
+        email: { label: "Email", type: "text", placeholder: "jsmith" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        
+        return NextResponse.json({ message: "Hello World" })
+
+        const userFound = prisma.user.findUnique({
+            where: {
+                email: credentials.email
             }
         })
-    ],
-    session: {
-        strategy: "jwt",
-        
+
+        if (!userFound) throw new Error("Invalid credentials")
+
+        const passwordMatch = await bcrypt.compare(
+          credentials.password,
+          userFound.password
+        )
+
+        if (!passwordMatch) throw new Error("Invalid credentials")
+
+        console.log(userFound)
+
+        return userFound
+      }
+    })
+  ],
+  pages: {
+    signIn: "/login"
+  },
+  session: {
+    strategy: "jwt"
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) token.user = user
+      return token
     },
-    callbacks: {
-        async jwt({ token, user }) {
-        
-            
-            if (user) return token.user = user
-            
-            return token;
-        }
+    async session({ session, token }) {
+      session.user = token.user
+      return session
     }
-    
+  }
 })
 
 export { handler as GET, handler as POST }
-
-{/*import NextAuth from 'next-auth';
-import CredentialsProvider from "next-auth/providers/credentials"
-import  hash  from "bcrypt";
-
-const handler = NextAuth({
-    providers: [
-        CredentialsProvider({
-            name: 'Credentials',
-            id: "credentials",
-            credentials: {
-                email: { label: "Email", type: "email", placeholder: "jsmith" },
-                password: { label: "Password", type: "password" }
-            },
-            async authorize(credencials) {
-                const API_URL = 'http://localhost:3001/api/'
-                
-            
-                const response = await fetch(API_URL + 'credentials', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(credencials)
-                })
-
-                const  userFound = await response.json()
-                if (! userFound) {
-                    throw new Error('No user found, Invalid credencials')
-                }
-
-                const passwrodMatch = await hash.compare(credencials.password,  userFound.hashedPassword)
-
-                if (!passwrodMatch) {
-                    throw new Error('Invalid credencials')
-                }
-
-            
-
-                
-                return userFound 
-            }
-        })
-    ],
-    pages: {
-        signIn: "/login",
-    }, 
-    session: {
-        strategy: "jwt",
-    },
-    callbacks: {
-        async jwt({ token, user }) {
-        
-            
-            if (user) return token.user = user
-            
-            return token;
-        },
-        async session({
-            session, token
-        }) {
-            
-            session.user = token
-        
-            return session
-        }
-    }
-
-})
-
-export { handler as GET, handler as POST }  */}
