@@ -13,23 +13,23 @@ function Signup() {
     try {
       const formData = new FormData(event.currentTarget)
       const fullname = formData.get("fullname")
-      const email = formData.get("email")
+      const email = "joheandroid@gmail.com"
       const password = formData.get("password")
-      const signupResponse = await fetch("/api/auth/signup", {
+
+      const signupResponse = await fetch("api/auth/signup", {
         method: "POST",
-        body: JSON.stringify({
-            fullname,
-            email,
-            password
-        }),
+        body: JSON.stringify({ fullname, email, password }),
         headers: {
           "Content-Type": "application/json"
         }
       })
+      const data = await signupResponse.json()
+      console.log(data)
+      
 
       const res = await signIn("credentials", {
-        email: signupResponse.data.email,
-        password: formData.get("password"),
+        email: data.email,
+        password: 123456,
         redirect: false
       })
 

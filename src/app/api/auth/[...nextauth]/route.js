@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import bcrypt from "bcryptjs"
+import  hash  from "bcrypt";
 import { NextResponse } from 'next/server'
 
 const handler = NextAuth({
@@ -15,26 +15,28 @@ const handler = NextAuth({
       },
       async authorize(credentials) {
         
-        return NextResponse.json({ message: "Hello World" })
+        
 
-        const userFound = prisma.user.findUnique({
+        const userFound = prisma.users.findUnique({
             where: {
                 email: credentials.email
             }
         })
+        const userData  = await userFound
 
-        if (!userFound) throw new Error("Invalid credentials")
+        if (!userData) throw new Error("Invalid credentials")
 
-        const passwordMatch = await bcrypt.compare(
-          credentials.password,
-          userFound.password
-        )
+        
 
-        if (!passwordMatch) throw new Error("Invalid credentials")
 
-        console.log(userFound)
+        const passwrodMatch = await hash.compare(credentials.password,  userData.password)
 
-        return userFound
+
+        if (!passwrodMatch) throw new Error("Invalid credentials" + userData)
+
+
+  
+        return userData
       }
     })
   ],
@@ -49,11 +51,22 @@ const handler = NextAuth({
       if (user) token.user = user
       return token
     },
-    async session({ session, token }) {
-      session.user = token.user
+    async session({
+        session, token
+    }) {
+      session.user = token
       return session
     }
   }
+
+  
+
+
+
+
+
+
+
 })
 
 export { handler as GET, handler as POST }

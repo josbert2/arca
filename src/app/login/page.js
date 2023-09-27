@@ -7,13 +7,18 @@ async  function Signin() {
   const [error, setError] = useState("")
   const router = useRouter()
 
-  const handleSubmit = async event => {
-    event.preventDefault()
-    const formData = new FormData(event.currentTarget)
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    const email = formData.get("email")
+    const password = formData.get("password")
+
+  
+
 
     const res = await signIn("credentials", {
-      email: formData.get("email"),
-      password: formData.get("password"),
+      email: email,
+      password:  password,
       redirect: false
     })
 

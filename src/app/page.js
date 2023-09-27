@@ -23,6 +23,7 @@ export default function Home() {
   return (
     <main className="min-h-screen " >
         <div class="pt-10 px-10">
+          
           <NameUser />
           <Kpis /> 
         

@@ -1,6 +1,18 @@
+'use client'
 import React from 'react'
 
+import { useSession, signOut } from "next-auth/react";
 export default function Header() {
+  
+  const { data: session, status } = useSession({
+    required: true,
+    onUnauthenticated() {
+      return { redirect: { destination: "/login", permanent: false } };
+    },
+  });
+
+  console.log(session, status)
+
 
   return (
     <div>
@@ -50,7 +62,10 @@ export default function Header() {
                           ></path>
                         </svg>
                         </div>
-                        <span class="ml-3 text-gray-800 border-l font-semibold border-gray-800/70 border-opacity-40 pl-4 text-sm">Wendy</span>
+                    
+                        <span class="ml-3 text-gray-800 border-l font-semibold border-gray-800/70 border-opacity-40 pl-4 text-sm">
+                          {session?.user?.email || "No email"}
+                        </span>
                     </div>
                 </div>
             </div>
